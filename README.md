@@ -1,19 +1,30 @@
 Vimpy
 =====
 
-Imagine you had a Vim module. Imagine Vimscript was a horrible excuse for a
-programming language... Actually, just imagine that first one.
+Simply put, Vimpy allows you to write Vim plugins without writing any
+Vimscript. This is done by abstracting Vim commands through a Pythonic
+interface.
 
-This project lets you use Python without any Vimscript. Seriously.
+**NOTE:** This is pre-alpha softare. As much as it should work as documented, there
+is potential for issues to arrise. If they do, please [create an issue][issue]
+so that we can make this software better. We welcome any feedback, suggestions,
+or complaints. Please don't be shy!
 
-If your module is called *Cheese* and you put a Python package inside
-of it called cheese, then Vimpy will do the hard work for you - and
-automatically import your cheesy package.
+Documentation
+-------------
 
-Just import vim in one of your modules, and you're ready to go.
+[Vimpy's documentation][wiki] is available at the [GitHub wiki page][wiki]. If
+you run into any problems with the documentation, or if you just have a
+recommendation on how to make it better - please don't hesitate to [create a
+new issue][issue]. We expect that Vimpy might have a couple issues, and will
+always want to make this library better in any way possible.
 
-Also
-====
+Quick Start
+-----------
 
-This README will get better when I have time to work on it.
+The quick start from this README document has been moved to the wiki. You can
+[find it here.][qkst]
 
+[wiki]: https://github.com/LimpidTech/Vimpy/wiki
+[issue]: https://github.com/LimpidTech/Vimpy/issues/new
+[qkst]: https://github.com/LimpidTech/Vimpy/wiki/Quick-Start

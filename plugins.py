@@ -1,19 +1,32 @@
 import vim
 from .autocommands import autocommands_map
+from .util import AutoInstance, template
 
-# TODO: Make this more cleanly
-observors = []
+observers = []
 
-def call_observors(event_name):
-    for observor in observors:
-      observor.emit(event_name)
+vim_observe_autocommand = template('observe_autocommand')
+vim_call_observors = template('get_call_observors')
+
+
+def call_observers(event_name):
+    for observer in observers:
+        observer.emit(event_name)
+
+vim.command(vim_call_observors)
+
 
 for command in autocommands_map:
-    au_command = 'au {0} * :python from vimpy.plugins import call_observors; call_observors("{0}");'.format(autocommands_map[command])
+    # Automating Cmd-Events is bad news. These must instead
+    # be bound manually by the plugin.
+    if autocommands_map[command][-3:] == 'Cmd':
+        continue
+
+    au_command = vim_observe_autocommand.format(autocommands_map[command])
     vim.command(au_command)
 
-class PluginObservor(object):
-    """ Provides a centralized observor for propagating Vim autocommands.
+
+class PluginObserver(object):
+    """ Provides a centralized observer for propagating Vim autocommands.
 
     Directly listens to Vim events and propagates them as required through
     any event listeners that register themselves with this object and provide
@@ -23,7 +36,7 @@ class PluginObservor(object):
 
     def __init__(self):
         """ Initializes a dict of events and their related listeners list.
-        
+
         Initializes self.listeners as a dict where keys are method names that
         are intended to respond to events. Each value is set to an empty list
         which contains all objects which are triggered by this event.
@@ -36,7 +49,7 @@ class PluginObservor(object):
         for event in autocommands_map:
             self.listeners[event] = []
 
-        observors.append(self)
+        observers.append(self)
 
     def create_emitter(self, event_name):
         """ Returns an emitter that will trigger event_name on listeners. """
@@ -49,7 +62,9 @@ class PluginObservor(object):
                 break
 
         if not handler_name_found:
-            raise NotImplementedError('No event handler exists for: {0}'.format(event_name))
+            raise NotImplementedError(
+                'No event handler exists for: {0}'.format(event_name)
+            )
 
         # Create the inner function. This functionally allows us to completely
         # fire events without doing any lookups in order to be as fast as
@@ -83,21 +98,22 @@ class PluginObservor(object):
                 if not listener in self.listeners[event]:
                     self.listeners[event].append(listener)
 
+# Instantiate a default observer for plugins that don't provide it explicitly
+default_observer = PluginObserver()
+
+
 class Plugin(object):
     """ Provides Pythonic event handling as an abstraction of Vim's events. """
 
+    __metaclass__ = AutoInstance
     auto_register = True
 
-    def __init__(self, observor=None): 
-        """ Sets up our plugin observor and registers to it if necessary. """
+    def __init__(self, observer=None):
+        """ Sets up our plugin observer and registers to it if necessary. """
 
-        if observor is None:
-            observor = default_observor
+        if observer is None:
+            self.observer = default_observer
 
-        # Automatically register this object with the observor if necessary.
+        # Automatically register this object with the observer if necessary.
         if self.auto_register is True:
-            observor.register(self)
-
-# Instantiate a default observor for plugins that don't provide it explicitly
-default_observor = PluginObservor()
-
+            self.observer.register(self)
